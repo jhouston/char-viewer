@@ -1,0 +1,8 @@
+.harDownloadButton OBJECT {
+	outline: none;
+	-moz-user-focus: ignore;
+}
+
+.harSaveButton {
+	background: url(images/save.png) no-repeat;
+}
