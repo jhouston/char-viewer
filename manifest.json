@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "CHAR Viewer",
+  "description": "Renders CHAR files.",
+  "version": "1.5",
+  "homepage_url": "https://github.com/jhouston/char-viewer",
+  "permissions": [
+    "tabs", "webNavigation"
+  ],
+  "icons" : {
+     "128" : "char-128.png",
+     "256" : "char-xxl.png"
+  },
+  "background" : {
+     "page" : "background.html"
+  },
+  "browser_action": {
+    "default_title": "",
+    "default_icon": "char-xxl.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_scripts": [ {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["scripts/jquery.js", "content_script.js"],
+      "all_frames" : true
+    }
+  ]
+}

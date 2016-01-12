@@ -1,0 +1,510 @@
+{
+    "$schema":"http://json-schema.org/draft-04/schema#",
+    "title":"CHAR File",
+    "description":"HAR 1.2 definition with application extensions",
+    "definitions":{
+        "appStateEntry":{
+            "description":"Defines an event in the app where the app itself has changed state.",
+            "type":"object",
+            "allOf":[
+                {
+                    "$ref":"#/definitions/baseEntryType"
+                },
+                {
+                    "properties":{
+                        "appState":{
+                            "description":"Class of event that triggered this entry.",
+                            "type":"string"
+                        },
+                        "appStateType":{
+                            "description":"Hint to the viewer about the type of the entry.",
+                            "enum":[
+                                "active",
+                                "inactive"
+                            ]
+                            
+                        },
+                        "sourceName":{
+                            "description":"Name of the source that triggered the event.",
+                            "type":"string"
+                        }
+                    },
+                    "required":[
+                        "appState",
+                        "appStateType",
+                        "sourceName"
+                    ]
+                }
+            ]
+        },
+        "baseEntryType":{
+            "type":"object",
+            "properties":{
+                "entryType":{
+                    "description":"Allows a parser/renderer to know which type of entry object this is and render is accordingly. If an 'entry' item is missing an 'entryType' property, assume the entry is of type 'network.'",
+                    "enum":[
+                        "appState",
+                        "network"
+                    ]
+                },
+                "pageref":{
+                    "description":"Reference to the parent page. Since CHAR is built on HAR, and HAR is used web pages, this field is legacy but still required. Simply use a singl epage definition with a fixed ID and use that same ID as the value for all entries in CHAR files.",
+                    "type":"string",
+                    "default":"char_application"
+                },
+                "startedDateTime":{
+                    "description":"Date and time stamp of the event start (ISO 8601 - YYYY-MM-DDThh:mm:ss.sTZD). For example: 2015-06-30T20:36:42.874Z",
+                    "type":"string",
+                    "pattern":"^(\\d{4})(-)?(\\d\\d)(-)?(\\d\\d)(T)?(\\d\\d)(:)?(\\d\\d)(:)?(\\d\\d)(\\.\\d+)?(Z|([+-])(\\d\\d)(:)?(\\d\\d))$"
+                }
+            },
+            "required":[
+                "pageRef",
+                "startedDateTime"
+            ]
+        },
+        "nameValuePair":{
+            "type":"object",
+            "properties":{
+                "comment":{
+                    "description":"A comment provided by the user or the application.",
+                    "type":"string"
+                },
+                "name":{
+                    "description":"String name",
+                    "type":"string"
+                },
+                "value":{
+                    "description":"String value",
+                    "type":"string"
+                }
+            },
+            "required":[
+                "name",
+                "value"
+            ]
+        },
+        "networkEntry":{
+            "description":"Original HAR entry for network events. Extended for CHAR files as listed",
+            "type":"object",
+            "allOf":[
+                {
+                    "$ref":"#/definitions/baseEntryType"
+                },
+                {
+                    "properties":{
+                        "cache":{
+                            "description":"HAR FIELD NOT USED BY CHAR; Info about cache usage",
+                            "type":"object"
+                        },
+                        "comment":{
+                            "description":"A comment provided by the user or the application.",
+                            "type":"string"
+                        },
+                        "connection":{
+                            "description":"Unique ID of the parent TCP/IP connection, can be the client or server port number. Note that a port number doesn't have to be unique identifier in cases where the port is shared for more connections. If the port isn't available for the application, any other unique connection ID can be used instead (e.g. connection index). Leave out this field if the application doesn't support this info.",
+                            "type":"string"
+                        },
+                        "request":{
+                            "description":"Detailed info about the request.",
+                            "type":"object",
+                            "proeprties":{
+                                "bodySize":{
+                                    "description":"Size of the request body (POST data payload) in bytes. Set to -1 if the info is not available.",
+                                    "type":"integer"
+                                },
+                                "comment":{
+                                    "description":"A comment provided by the user or the application.",
+                                    "type":"string"
+                                },
+                                "cookies":{
+                                    "description":"HAR FIELD NOT USED IN CHAR; List of cookie objects.",
+                                    "type":"object"
+                                },
+                                "headers":{
+                                    "description":"List of header objects.",
+                                    "type":"array",
+                                    "items":{
+                                        "$ref":"#/definitions/nameValuePair"
+                                    }
+                                },
+                                "headersSize":{
+                                    "description":"Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body. Set to -1 if the info is not available.",
+                                    "type":"integer"
+                                },
+                                "httpVersion":{
+                                    "description":"Request HTTP Version.",
+                                    "type":"string"
+                                },
+                                "method":{
+                                    "description":"Request method (GET, POST, ...).",
+                                    "type":"string",
+                                    "enum":[
+                                        "OPTIONS",
+                                        "GET",
+                                        "HEAD",
+                                        "POST",
+                                        "PUT",
+                                        "DELETE",
+                                        "TRACE",
+                                        "CONNECT"
+                                    ]
+                                },
+                                "postData":{
+                                    "description":"Posted data info. ONLY VISIBLE IN DEBUG BUILDS",
+                                    "type":"object",
+                                    "properties":{
+                                        "comment":{
+                                            "description":" A comment provided by the user or the application.",
+                                            "type":"string"
+                                        },
+                                        "mimeType":{
+                                            "description":"Mime type of posted data.",
+                                            "type":"string"
+                                        },
+                                        "params":{
+                                            "description":"List of posted parameters (in case of URL encoded parameters).",
+                                            "type":"array",
+                                            "items":{
+                                                "type":"object",
+                                                "properties":{
+                                                    "comment":{
+                                                        "description":" A comment provided by the user or the application.",
+                                                        "type":"string"
+                                                    },
+                                                    "contentType":{
+                                                        "description":"Content type of a posted file",
+                                                        "type":"string"
+                                                    },
+                                                    "fileName":{
+                                                        "description":"Name of a posted file",
+                                                        "type":"string"
+                                                    },
+                                                    "name":{
+                                                        "description":"Name of a posted parameter.",
+                                                        "type":"string"
+                                                    },
+                                                    "value":{
+                                                        "description":"Value of a posted parameter or content of a posted file.",
+                                                        "type":"string"
+                                                    }
+                                                },
+                                                "required":[
+                                                    "name"
+                                                ]
+                                            }
+                                        },
+                                        "text":{
+                                            "description":"Plain text posted data",
+                                            "type":"string"
+                                        }
+                                    },
+                                    "required":[
+                                        "mimeType",
+                                        "params",
+                                        "text"
+                                    ]
+                                },
+                                "queryString":{
+                                    "description":"List of query parameter objects.",
+                                    "type":"array",
+                                    "items":{
+                                        "$ref":"#/definitions/nameValuePair"
+                                    }
+                                },
+                                "url":{
+                                    "description":"Absolute URL of the request (fragments are not included).",
+                                    "type":"string"
+                                }
+                            },
+                            "required":[
+                                "bodySize",
+                                "headers",
+                                "headersSize",
+                                "httpVersion",
+                                "method",
+                                "queryString",
+                                "url"
+                            ]
+                        },
+                        "requestId":{
+                            "description":"CHAR EXTENSION FIELD; All network requests for the same operation (but retried with multiple network operations) will be tagged with the same requestId",
+                            "type":"integer"
+                        },
+                        "response":{
+                            "description":"Detailed info about the response.",
+                            "type":"object",
+                            "properties":{
+                                "bodySize":{
+                                    "description":"Size of the received response body in bytes. Set to zero in case of responses coming from the cache (304). Set to -1 if the info is not available.",
+                                    "type":"integer"
+                                },
+                                "comment":{
+                                    "description":"A comment provided by the user or the application.",
+                                    "type":"string"
+                                },
+                                "content":{
+                                    "description":"Details about the response body",
+                                    "type":"object",
+                                    "properties":{
+                                        "comment":{
+                                            "description":"A comment provided by the user or the application.",
+                                            "type":"string"
+                                        },
+                                        "compression":{
+                                            "description":"HAR FIELD NOT USED IN CHAR; Number of bytes saved. Leave out this field if the information is not available.",
+                                            "type":"number"
+                                        },
+                                        "encoding":{
+                                            "description":" Encoding used for response text field e.g 'base64'. Leave out this field if the text field is HTTP decoded (decompressed & unchunked), than trans-coded from its original character set into UTF-8.",
+                                            "type":"string"
+                                        },
+                                        "mimeType":{
+                                            "description":"MIME type of the response text (value of the Content-Type response header). The charset attribute of the MIME type is included (if available).",
+                                            "type":"string"
+                                        },
+                                        "size":{
+                                            "description":"Length of the returned content in bytes. Should be equal to response.bodySize if there is no compression and bigger when the content has been compressed.",
+                                            "type":"integer"
+                                        },
+                                        "text":{
+                                            "description":"Response body sent from the server or loaded from the browser cache. This field is populated with textual content only. The text field is either HTTP decoded text or a encoded (e.g. 'base64') representation of the response body. Leave out this field if the information is not available.",
+                                            "type":"string"
+                                        }
+                                    },
+                                    "required":[
+                                        "mimeType",
+                                        "size"
+                                    ]
+                                },
+                                "cookies":{
+                                    "description":"HAR FIELD NOT USED IN CHAR; List of cookie objects",
+                                    "type":"array"
+                                },
+                                "headers":{
+                                    "description":"List of header objects.",
+                                    "type":"array",
+                                    "items":{
+                                        "type":"object",
+                                        "properties":{
+                                            "comment":{
+                                                "description":"A comment provided by the user or the application.",
+                                                "type":"string"
+                                            },
+                                            "name":{
+                                                "description":"Header name",
+                                                "type":"string"
+                                            },
+                                            "value":{
+                                                "description":"Header value",
+                                                "type":"string"
+                                            }
+                                        },
+                                        "required":[
+                                            "name",
+                                            "value"
+                                        ]
+                                    }
+                                },
+                                "headersSize":{
+                                    "description":"Total number of bytes from the start of the HTTP response message until (and including) the double CRLF before the body. Set to -1 if the info is not available. NOTE: The size of received response-headers is computed only from headers that are really received from the server. Additional headers appended by the browser are not included in this number, but they appear in the list of header objects.",
+                                    "type":"integer"
+                                },
+                                "httpVersion":{
+                                    "description":"Response HTTP Version.",
+                                    "type":"string"
+                                },
+                                "redirectURL":{
+                                    "description":"Redirection target URL from the Location response header.",
+                                    "type":"string"
+                                },
+                                "status":{
+                                    "description":"Response status",
+                                    "type":"integer"
+                                },
+                                "statusText":{
+                                    "description":"Response status description",
+                                    "type":"string"
+                                }
+                            },
+                            "required":[
+                                "bodySize",
+                                "content",
+                                "cookies",
+                                "headers",
+                                "headersSize",
+                                "httpVersion",
+                                "redirectURL",
+                                "status",
+                                "statusText"
+                            ]
+                        },
+                        "serverIPAdress":{
+                            "description":"IP address of the server that was connected (result of DNS resolution).",
+                            "type":"string"
+                        },
+                        "time":{
+                            "description":"Total elapsed time of the request in milliseconds. This is the sum of all timings available in the timings object (i.e. not including -1 values) .",
+                            "type":"integer"
+                        },
+                        "timings":{
+                            "description":"Detailed timing info about request/response round trip.",
+                            "type":"object",
+                            "properties":{
+                                "blocked":{
+                                    "description":"CHAR EXTENSION FIELD; Time spent in a queue waiting for a network connection. Use -1 if the timing does not apply to the current request.",
+                                    "type":"integer"
+                                },
+                                "comment":{
+                                    "description":"A comment provided by the user or the application.",
+                                    "type":"string"
+                                },
+                                "connect":{
+                                    "description":"Time required to create TCP connection. Use -1 if the timing does not apply to the current request.",
+                                    "type":"integer"
+                                },
+                                "dns":{
+                                    "description":"DNS resolution time. The time required to resolve a host name. Use -1 if the timing does not apply to the current request.",
+                                    "type":"integer"
+                                },
+                                "receive":{
+                                    "description":"Time required to read entire response from the server (or cache).",
+                                    "type":"integer"
+                                },
+                                "send":{
+                                    "description":"Time required to send HTTP request to the server.",
+                                    "type":"integer"
+                                },
+                                "ssl":{
+                                    "description":"Time required for SSL/TLS negotiation. If this field is defined then the time is also included in the connect field (to ensure backward compatibility with HAR 1.1). Use -1 if the timing does not apply to the current request.",
+                                    "type":"integer"
+                                },
+                                "wait":{
+                                    "description":"Waiting for a response from the server.",
+                                    "type":"integer"
+                                }
+                            },
+                            "required":[
+                                "blocked",
+                                "send",
+                                "receive",
+                                "wait"
+                            ]
+                        }
+                    },
+                    "required":[
+                        "cache",
+                        "request",
+                        "requestId",
+                        "response",
+                        "startedDateTime",
+                        "time",
+                        "timings"
+                    ]
+                }
+            ]
+        }
+    },
+    "type":"object",
+    "properties":{
+        "log":{
+            "description":"This object represents the root of exported data.",
+            "type":"object",
+            "properties":{
+                "browser":{
+                    "description":"HAR FIELD NOT USED IN CHAR; Name and version info of used browser.",
+                    "type":"object"
+                },
+                "comment":{
+                    "description":"A comment provided by the user or the application.",
+                    "type":"string"
+                },
+                "creator":{
+                    "description":"Name and version info of the log creator application.",
+                    "type":"object",
+                    "properties":{
+                        "comment":{
+                            "description":"A comment provided by the user or the application.",
+                            "type":"string"
+                        },
+                        "name":{
+                            "description":"Name of the application/browser used to export the log.",
+                            "type":"string"
+                        },
+                        "version":{
+                            "description":"Version of the application/browser used to export the log.",
+                            "type":"string"
+                        }
+                    },
+                    "required":[
+                        "name",
+                        "version"
+                    ]
+                },
+                "entries":{
+                    "description":"List of all exported (tracked) requests.",
+                    "type":"array",
+                    "items":{
+                        "anyOf":[
+                            {
+                                "$ref":"#/definitions/appStateEntry"
+                            },
+                            {
+                                "$ref":"#/definitions/networkEntry"
+                            }
+                        ]
+                    },
+                    "pages":{
+                        "description":"List of all exported (tracked) pages. Leave out this field if the application does not support grouping by pages.",
+                        "type":"array",
+                        "items":{
+                            "type":"object",
+                            "properties":{
+                                "comment":{
+                                    "description":"A comment provided by the user or the application.",
+                                    "type":"string"
+                                },
+                                "id":{
+                                    "description":"Unique identifier of a page within the <log>. Entries use it to refer the parent page.",
+                                    "type":"string",
+                                    "default":"char_application"
+                                },
+                                "pageTimings":{
+                                    "description":"HAR FIELD NOT USED IN CHAR; Detailed timing info about page load.",
+                                    "type":"object"
+                                },
+                                "startedDateTime":{
+                                    "description":"Date and time stamp for the beginning of the page load (ISO 8601 - YYYY-MM-DDThh:mm:ss.sTZD, e.g. 2009-07-24T19:20:30.45+01:00). In CHAR files, this is the date that the first request in the circular buffer of requests started",
+                                    "type":"string"
+                                },
+                                "title":{
+                                    "description":"Page title.",
+                                    "type":"string",
+                                    "default":"Android Request Group"
+                                }
+                            },
+                            "required":[
+                                "id",
+                                "startedDateTime",
+                                "title"
+                            ]
+                        }
+                    },
+                    "version":{
+                        "description":"Version number of the format. If empty, string '1.1' is assumed by default.",
+                        "type":"string"
+                    }
+                }
+            },
+            "required":[
+                "creator",
+                "entries",
+                "pages",
+                "version"
+            ]
+        }
+    },
+    "required":[
+        "log"
+    ]
+}
